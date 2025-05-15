@@ -18,8 +18,7 @@ Enable readers to gain balanced insights by surfacing concise summaries of how l
 ## 3. Core Features & Functionality
 1. **In-page Extraction**  
    - Use Mozilla Readability  in the client to grab clean text  
-   - Fallback to server-side Trafilatura for edge cases (paywalls/heavy JS) 
-   - Final fallback: Use Browserless API , set strict timeouts (05 seconds maximum) & cach results agressively (24-48 hours)
+   - (Final fall back: User guide extraction) Ask user for copy and paste content of article into extension's sidebar.
 
 2. **Topic Detection & Query Formulation**  
    - spaCy NER + BERTopic clustering for entities & themes  
