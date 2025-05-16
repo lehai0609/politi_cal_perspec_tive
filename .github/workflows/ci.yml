@@ -1,0 +1,27 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  lint-frontend:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: extension}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: {node-version: '18'}
+      - run: npm ci
+      - run: npx eslint src --max-warnings=0
+
+  lint-backend:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: backend}}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with: {python-version: '3.10'}
+      - run: python -m venv .venv
+      - run: . .venv/bin/activate && pip install black isort flake8
+      - run: . .venv/bin/activate && black --check .
+      - run: . .venv/bin/activate && isort --check-only .
+      - run: . .venv/bin/activate && flake8 .

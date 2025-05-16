@@ -1,0 +1,18 @@
+{
+  "name": "politi_cal_perspec_tive",
+  "version": "1.0.0",
+  "description": "**Name (TBD):** Political Perspectives Sidebar  \r **Objective:**  \r Enable readers to gain balanced insights by surfacing concise summaries of how left-, center-, and right-leaning outlets cover the same news story—directly in a Chrome sidebar, in under 3 seconds per request, while keeping costs controlled and preserving precision.",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7"
+  }
+}

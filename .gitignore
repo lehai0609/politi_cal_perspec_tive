@@ -1,0 +1,69 @@
+# ─── Root-level general ignores ────────────────────────────────────────────────
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Git conflict files
+*.orig
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Environment files
+.env
+.env.*.local
+
+# ─── Node / Frontend (extension/) ─────────────────────────────────────────────
+
+# dependency directories
+extension/node_modules/
+
+# build output
+extension/dist/
+extension/build/
+
+# VSCode workspace settings (if any)
+extension/.vscode/
+
+# ─── Python / Backend (backend/) ─────────────────────────────────────────────
+
+# virtual environments
+backend/.venv/
+backend/venv/
+
+# byte-compiled / cache
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# distribution / packaging
+backend/dist/
+backend/build/
+backend/*.egg-info/
+
+# VSCode workspace settings (if any)
+backend/.vscode/
+
+# ─── Hooks & Tooling ──────────────────────────────────────────────────────────
+
+# Husky internal (if you use the default .husky dir, keep it tracked)
+# but ignore any internal staging folder
+.husky/_/
+
+# pre-commit config itself is tracked, but not its cache
+.pre-commit-config.yaml
+
+# ─── IDEs & Editors ───────────────────────────────────────────────────────────
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
