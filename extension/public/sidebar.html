@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Political Perspectives Sidebar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Basic styling to ensure the sidebar content uses available space and Inter font */
+      body {
+        font-family: 'Inter', sans-serif;
+        /* Ensure the body takes up the full height for the sidebar and has no margin */
+        height: 100vh;
+        margin: 0;
+        display: flex; /* Allow #root to grow */
+        flex-direction: column; /* Stack children vertically */
+        background-color: #f3f4f6; /* A light gray background, similar to Tailwind's bg-gray-100 */
+      }
+      /* The root div where the React app will be mounted */
+      #root {
+        flex-grow: 1; /* Allow the root div to take up available vertical space */
+        display: flex; /* If the direct child of root also needs to flex-grow */
+        flex-direction: column; /* Stack children vertically */
+        /* Padding will be applied by Tailwind classes in the React component if needed */
+      }
+    </style>
+</head>
+<body>
+    <div id="root">
+        </div>
+
+    <script src="../dist/sidebar.js" type="module"></script>
+</body>
+</html>

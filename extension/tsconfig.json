@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Compile to modern JavaScript
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"], // Standard libraries available
+    "allowJs": false, // Don't allow JavaScript files (we're using TypeScript)
+    "skipLibCheck": true, // Skip type checking of declaration files
+    "esModuleInterop": true, // Enables compatibility with CommonJS modules
+    "allowSyntheticDefaultImports": true, // Allows default imports from modules with no default export
+    "strict": true, // Enable all strict type-checking options
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext", // Use ES modules
+    "moduleResolution": "Node", // How modules get resolved
+    "resolveJsonModule": true, // Allows importing JSON files
+    "isolatedModules": true, // Ensures each file can be safely transpiled without relying on other imports
+    "noEmit": true, // Vite handles the emitting of files, not tsc directly for bundling
+    "jsx": "react-jsx", // Use the new JSX transform
+    "outDir": "dist", // This is more for tsc's own build, Vite will use its config
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"] // Optional: for aliased imports like @/components/MyComponent
+    }
+  },
+  "include": ["src"], // Which files TypeScript should check
+  "references": [{ "path": "./tsconfig.node.json" }] // For Vite config itself
+}

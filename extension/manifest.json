@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Political Perspectives Sidebar",
+  "version": "0.1.0",
+  "description": "Provides diverse political perspectives on news articles.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel"
+  ],
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Open Political Perspectives Sidebar"
+  },
+  "background": {
+    "service_worker": "dist/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "dist/contentScript.js"
+      ]
+    }
+  ],
+  "side_panel": {
+    "default_path": "public/sidebar.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' https://cdn.tailwindcss.com; object-src 'self';"
+  }
+}
