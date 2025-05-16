@@ -1,101 +1,107 @@
 // extension/src/sidebar/Sidebar.tsx
 import React, { useState, useEffect } from 'react';
 
-/**
- * The main React component for the Political Perspectives Sidebar.
- * It displays the extension's UI within the Chrome side panel.
- */
 const Sidebar: React.FC = () => {
-  // State to hold the URL of the current active tab.
-  const [currentUrl, setCurrentUrl] = useState<string>('Loading URL...');
-  // State to hold any error messages during URL retrieval.
+  const [currentUrl, setCurrentUrl] = useState<string>('Requesting URL...');
+  const [pageTitle, setPageTitle] = useState<string>('Loading title...');
   const [error, setError] = useState<string | null>(null);
 
-  // useEffect hook to fetch the current tab's URL when the component mounts.
   useEffect(() => {
-    // Check if the chrome.tabs API is available (it should be in a side panel context).
+    // Check if chrome.tabs is available (it might not be in all testing environments)
     if (chrome.tabs && chrome.tabs.query) {
-      // Query for the active tab in the current window.
+      // Query for the active tab in the current window to send a message to it.
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        // Handle potential errors from the chrome.tabs.query API.
         if (chrome.runtime.lastError) {
           const errorMessage = `Error querying tabs: ${chrome.runtime.lastError.message}`;
-          console.error(errorMessage);
+          console.error("Sidebar:", errorMessage);
           setError(errorMessage);
-          setCurrentUrl('Could not retrieve URL.');
+          setCurrentUrl('Error finding active tab.');
+          setPageTitle('');
           return;
         }
 
-        // Check if any tabs were returned and if the first tab has a URL.
-        if (tabs && tabs.length > 0 && tabs[0].url) {
-          setCurrentUrl(tabs[0].url);
+        if (tabs && tabs.length > 0 && tabs[0].id) {
+          const activeTabId = tabs[0].id;
+          // Send a message to the content script of the active tab
+          chrome.tabs.sendMessage(
+            activeTabId,
+            { action: "PP_GET_PAGE_DETAILS_FOR_SIDEBAR" }, // Message payload
+            (response) => {
+              if (chrome.runtime.lastError) {
+                // This can happen if the content script isn't injected on the page,
+                // or if the page is a restricted page (e.g., chrome:// pages, Web Store)
+                const errorMessage = `Error sending/receiving message: ${chrome.runtime.lastError.message}. Is content script active on this page?`;
+                console.error("Sidebar:", errorMessage);
+                setError(errorMessage);
+                setCurrentUrl('Could not get URL from page.');
+                setPageTitle('Could not get title from page.');
+                return;
+              }
+              if (response && response.status === "success" && response.data) {
+                console.log("Sidebar: Received page details:", response.data);
+                setCurrentUrl(response.data.url || 'URL not provided by content script.');
+                setPageTitle(response.data.title || 'Title not provided by content script.');
+                setError(null);
+              } else {
+                const errorMessage = "Sidebar: Invalid or no response from content script for page details.";
+                console.warn(errorMessage, response);
+                setError(errorMessage);
+                setCurrentUrl('Failed to get URL.');
+                setPageTitle('Failed to get title.');
+              }
+            }
+          );
         } else {
-          // Fallback if no active tab or URL is found.
-          setCurrentUrl('No active tab URL found.');
-          console.warn("No active tab or URL found from chrome.tabs.query.");
+          const noTabMessage = "Sidebar: No active tab found to send message to.";
+          console.warn(noTabMessage);
+          setError(noTabMessage);
+          setCurrentUrl('No active tab identified.');
+          setPageTitle('');
         }
       });
     } else {
-      // Fallback or error message if chrome.tabs API is not available.
-      const unavailableMessage = 'chrome.tabs API not available in this context.';
-      setCurrentUrl(unavailableMessage);
-      setError(unavailableMessage);
-      console.warn("chrome.tabs API not available. Ensure this runs in the side panel context.");
+      const noTabsApiMessage = "Sidebar: chrome.tabs API not available.";
+      console.error(noTabsApiMessage);
+      setError(noTabsApiMessage);
+      setCurrentUrl('Cannot access tabs API.');
+      setPageTitle('');
     }
-  }, []); // Empty dependency array means this effect runs once after the initial render.
+  }, []); // Empty dependency array: run once on mount
 
   return (
-    // Main container for the sidebar, using Tailwind CSS classes for styling.
-    // flex flex-col: Makes this a flex container with items stacked vertically.
-    // h-full: Takes up the full height of its parent (which should be the #root div).
-    // bg-white: Sets a white background.
-    // shadow-lg: Applies a large shadow for a lifted appearance.
-    // rounded-lg: Applies rounded corners.
-    // p-6: Applies padding on all sides.
     <div className="flex flex-col h-full bg-white shadow-lg rounded-lg p-6">
-      {/* Header section */}
       <header className="mb-6 pb-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800">Political Perspectives</h1>
         <p className="text-sm text-gray-500 mt-1">Diverse views on the news you read.</p>
       </header>
       
-      {/* Main content area */}
-      {/* flex-grow: Allows this section to take up available vertical space. */}
-      {/* overflow-y-auto: Adds a scrollbar if content exceeds the height. */}
       <main className="flex-grow overflow-y-auto">
-        {/* Section to display the current article's URL */}
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
           <h2 className="text-lg font-semibold text-blue-700 mb-1">Current Article:</h2>
-          {error ? (
-            // Display error message if URL retrieval failed.
-            <p className="text-red-600 break-all text-sm">{error}</p>
-          ) : (
-            // Display the current URL as a clickable link if it's a valid HTTP/HTTPS URL.
-            <a 
-              href={currentUrl.startsWith('http') ? currentUrl : undefined} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className={`break-all text-sm ${
-                currentUrl.startsWith('http') 
-                  ? 'text-blue-600 hover:text-blue-800 hover:underline' 
-                  : 'text-gray-700' // Style for non-link text (e.g., "Loading URL...")
-              }`}
-            >
-              {currentUrl}
-            </a>
-          )}
+          {error && <p className="text-red-500 text-xs italic mt-1 mb-1">{error}</p>}
+          <p className="text-sm text-gray-800 font-medium break-all" title={pageTitle}>{pageTitle}</p>
+          <a 
+            href={currentUrl.startsWith('http') ? currentUrl : undefined} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className={`block break-all text-xs mt-1 ${
+              currentUrl.startsWith('http') 
+                ? 'text-blue-600 hover:text-blue-800 hover:underline' 
+                : 'text-gray-500'
+            }`}
+          >
+            {currentUrl}
+          </a>
         </div>
 
-        {/* Placeholder for where the perspectives will be loaded */}
         <div className="p-4 bg-gray-50 border border-gray-200 rounded-md mt-4">
           <h3 className="text-md font-semibold text-gray-700">Perspectives will load here...</h3>
           <p className="text-sm text-gray-500 mt-2">
-            This area will display alternative political perspectives related to the current article once the backend is integrated.
+            This area will display alternative political perspectives related to the current article.
           </p>
         </div>
       </main>
 
-      {/* Footer section */}
       <footer className="mt-6 pt-4 border-t border-gray-200">
         <p className="text-xs text-gray-400 text-center">
           Political Perspectives Sidebar v0.1.0

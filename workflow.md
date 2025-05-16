@@ -418,11 +418,3 @@ All hops except extractor/search run inside the same Cloud Run container initial
 Monitoring wired via Cloud Logging & Error Reporting as specified in the master plan.&#x20;
 
 ---
-
-### Next Action → Implementation
-
-1. **Define Pydantic request/response models** mirroring the above shapes.
-2. Stub each router with `TODO` to call its successor, enabling incremental dev.
-3. Set up **contract tests (pytest + Schemathesis)** so future schema tweaks fail CI.
-
-When you give the green light, we can start writing those Pydantic models and FastAPI stubs.
