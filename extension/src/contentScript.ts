@@ -1,6 +1,22 @@
 // extension/src/contentScript.ts
 
+import { Readability } from '@mozilla/readability';
+
 console.log("Political Perspectives Content Script Loaded on this page.");
+
+/**
+ * Extract article text using Mozilla Readability.
+ */
+export function extractArticleContent(): string | null {
+  try {
+    const docClone = document.cloneNode(true) as Document;
+    const article = new Readability(docClone).parse();
+    return article?.textContent ?? null;
+  } catch (err) {
+    console.error('Content script: failed to extract article', err);
+    return null;
+  }
+}
 
 /**
  * Listener for messages from other parts of the extension (e.g., sidebar).
@@ -22,7 +38,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     // Return true to indicate that sendResponse will be called asynchronously.
     // This is important if your response logic involves any async operations,
     // though in this simple case it might not be strictly necessary, it's good practice.
-    return true; 
+    return true;
+  }
+
+  if (request.action === "PP_EXTRACT_ARTICLE") {
+    console.log("Content script: extracting article text");
+    const text = extractArticleContent();
+    if (text) {
+      sendResponse({ status: 'success', data: text });
+    } else {
+      sendResponse({ status: 'error', error: 'No article content found' });
+    }
+    return true;
   }
 
   // If you have other actions, add more 'if' blocks here.
@@ -33,6 +60,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 // --- Placeholder for Future Functionality (as before) ---
-// 1.  Extract Article Content (using Readability.js or similar).
-// 2.  More complex communication if needed.
+// Additional actions can be handled here as the extension grows.
 // -------------------------------------------------------

@@ -5,6 +5,7 @@ const Sidebar: React.FC = () => {
   const [currentUrl, setCurrentUrl] = useState<string>('Requesting URL...');
   const [pageTitle, setPageTitle] = useState<string>('Loading title...');
   const [error, setError] = useState<string | null>(null);
+  const [articleText, setArticleText] = useState<string>('');
 
   useEffect(() => {
     // Check if chrome.tabs is available (it might not be in all testing environments)
@@ -42,6 +43,23 @@ const Sidebar: React.FC = () => {
                 setCurrentUrl(response.data.url || 'URL not provided by content script.');
                 setPageTitle(response.data.title || 'Title not provided by content script.');
                 setError(null);
+
+                chrome.tabs.sendMessage(
+                  activeTabId,
+                  { action: 'PP_EXTRACT_ARTICLE' },
+                  (extractResp) => {
+                    if (chrome.runtime.lastError) {
+                      console.error('Sidebar:', chrome.runtime.lastError.message);
+                      setArticleText('Error extracting article.');
+                      return;
+                    }
+                    if (extractResp && extractResp.status === 'success') {
+                      setArticleText(extractResp.data || '');
+                    } else {
+                      setArticleText('No article content found.');
+                    }
+                  }
+                );
               } else {
                 const errorMessage = "Sidebar: Invalid or no response from content script for page details.";
                 console.warn(errorMessage, response);
@@ -80,18 +98,24 @@ const Sidebar: React.FC = () => {
           <h2 className="text-lg font-semibold text-blue-700 mb-1">Current Article:</h2>
           {error && <p className="text-red-500 text-xs italic mt-1 mb-1">{error}</p>}
           <p className="text-sm text-gray-800 font-medium break-all" title={pageTitle}>{pageTitle}</p>
-          <a 
-            href={currentUrl.startsWith('http') ? currentUrl : undefined} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={currentUrl.startsWith('http') ? currentUrl : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
             className={`block break-all text-xs mt-1 ${
-              currentUrl.startsWith('http') 
-                ? 'text-blue-600 hover:text-blue-800 hover:underline' 
+              currentUrl.startsWith('http')
+                ? 'text-blue-600 hover:text-blue-800 hover:underline'
                 : 'text-gray-500'
             }`}
           >
             {currentUrl}
           </a>
+          {articleText && (
+            <div className="mt-2">
+              <h3 className="text-sm font-semibold text-gray-700">Extracted Text</h3>
+              <p className="text-xs text-gray-800 whitespace-pre-wrap">{articleText}</p>
+            </div>
+          )}
         </div>
 
         <div className="p-4 bg-gray-50 border border-gray-200 rounded-md mt-4">
