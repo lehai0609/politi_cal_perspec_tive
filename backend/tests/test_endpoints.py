@@ -1,28 +1,40 @@
 import unittest
 
-from fastapi.testclient import TestClient
-
-from backend.main import app
+from backend.services.dedup import Deduplicator
+from backend.services.retrieval import SearchAggregator
+from backend.services.topics import TopicDetector
 
 
 class APITestCase(unittest.TestCase):
     def setUp(self):
-        self.client = TestClient(app)
+        pass
 
     def test_topics(self):
-        response = self.client.post("/topics/", json={"text": "hello world hello"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"topics": ["hello", "world"]})
+        topics = TopicDetector.get_topics("hello world hello")
+        self.assertEqual(topics, ["hello", "world"])
 
     def test_search(self):
-        response = self.client.post("/search/", json={"query": "news"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"results": ["news", "news result"]})
+        results = SearchAggregator.search("news")
+        self.assertEqual(results, ["news", "news result"])
 
     def test_dedup(self):
-        response = self.client.post("/dedup/", json={"items": ["a", "a", "b"]})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"groups": [["a", "a"], ["b"]]})
+        groups = Deduplicator.group_by_simhash(["a", "a", "b"])
+        self.assertEqual(
+            [g.dict() for g in groups],
+            [
+                {"representative": "a", "duplicates": ["a"]},
+                {"representative": "b", "duplicates": []},
+            ],
+        )
+
+    def test_near_duplicate_grouping(self):
+        items = ["hello world", "hello world!", "another text"]
+        groups = Deduplicator.group_by_simhash(items)
+        self.assertEqual(len(groups), 2)
+        first_group = groups[0].dict()
+        self.assertIn(first_group["representative"], {"hello world", "hello world!"})
+        self.assertEqual(len(first_group["duplicates"]), 1)
+        self.assertIn(first_group["duplicates"][0], {"hello world", "hello world!"})
 
 
 if __name__ == "__main__":

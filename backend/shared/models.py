@@ -25,5 +25,10 @@ class DedupRequest(BaseModel):
     items: List[str]
 
 
+class DedupGroup(BaseModel):
+    representative: str
+    duplicates: List[str]
+
+
 class DedupResponse(BaseModel):
-    groups: List[List[str]]
+    groups: List[DedupGroup]
