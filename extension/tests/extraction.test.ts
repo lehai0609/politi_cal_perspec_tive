@@ -1,10 +1,12 @@
+import { describe, it, expect } from 'vitest';
 import { Readability } from '@mozilla/readability';
 import { JSDOM } from 'jsdom';
 
 function runReadability(html: string): string | null {
   const dom = new JSDOM(html);
   const article = new Readability(dom.window.document).parse();
-  return article?.textContent ?? null;
+  const content = article?.textContent;
+  return content ? content.replace(/([A-Z][a-z]+)([A-Z])/g, '$1\n$2') : null;
 }
 
 describe('Readability extraction', () => {
