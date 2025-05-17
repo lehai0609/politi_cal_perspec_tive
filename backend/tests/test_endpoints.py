@@ -9,8 +9,18 @@ from backend.shared.models import Article, TopicRequest, SearchRequest, DedupReq
 
 class APITestCase(unittest.TestCase):
     def test_topics(self):
+        #Direct fucntion test
         resp = detect_topics(TopicRequest(text="hello world hello"))
         self.assertEqual(resp.dict(), {"topics": ["hello", "world"]})
+        # API endpoint test
+        text = "Barack Obama met Angela Merkel in Berlin."
+        response = self.client.post("/topics/", json={"text": text})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {"topics": ["Barack Obama", "Angela Merkel", "Berlin"]},
+        )
+
 
     def test_search(self):
         dummy = [Article(url="http://example.com", title="Example")]
