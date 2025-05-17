@@ -5,6 +5,13 @@ from typing import List
 from pydantic import BaseModel
 
 
+class Article(BaseModel):
+    """Represents a single news article."""
+
+    url: str
+    title: str
+
+
 class TopicRequest(BaseModel):
     text: str
 
@@ -18,7 +25,7 @@ class SearchRequest(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    results: List[str]
+    articles: List[Article]
 
 
 class DedupRequest(BaseModel):

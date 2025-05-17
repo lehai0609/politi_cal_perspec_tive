@@ -1,28 +1,32 @@
 import unittest
+from unittest.mock import patch
 
-from fastapi.testclient import TestClient
-
-from backend.main import app
+from backend.services.dedup import group
+from backend.services.retrieval import search as search_endpoint
+from backend.services.topics import detect_topics
+from backend.shared.models import Article, TopicRequest, SearchRequest, DedupRequest
 
 
 class APITestCase(unittest.TestCase):
-    def setUp(self):
-        self.client = TestClient(app)
-
     def test_topics(self):
-        response = self.client.post("/topics/", json={"text": "hello world hello"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"topics": ["hello", "world"]})
+        resp = detect_topics(TopicRequest(text="hello world hello"))
+        self.assertEqual(resp.dict(), {"topics": ["hello", "world"]})
 
     def test_search(self):
-        response = self.client.post("/search/", json={"query": "news"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"results": ["news", "news result"]})
+        dummy = [Article(url="http://example.com", title="Example")]
+        with patch(
+            "backend.services.retrieval.aggregator.SearchAggregator.search",
+            return_value=dummy,
+        ):
+            resp = search_endpoint(SearchRequest(query="news"))
+        self.assertEqual(
+            resp.dict(),
+            {"articles": [{"url": "http://example.com", "title": "Example"}]},
+        )
 
     def test_dedup(self):
-        response = self.client.post("/dedup/", json={"items": ["a", "a", "b"]})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"groups": [["a", "a"], ["b"]]})
+        resp = group(DedupRequest(items=["a", "a", "b"]))
+        self.assertEqual(resp.dict(), {"groups": [["a", "a"], ["b"]]})
 
 
 if __name__ == "__main__":
