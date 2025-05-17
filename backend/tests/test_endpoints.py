@@ -10,9 +10,13 @@ class APITestCase(unittest.TestCase):
         self.client = TestClient(app)
 
     def test_topics(self):
-        response = self.client.post("/topics/", json={"text": "hello world hello"})
+        text = "Barack Obama met Angela Merkel in Berlin."
+        response = self.client.post("/topics/", json={"text": text})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"topics": ["hello", "world"]})
+        self.assertEqual(
+            response.json(),
+            {"topics": ["Barack Obama", "Angela Merkel", "Berlin"]},
+        )
 
     def test_search(self):
         response = self.client.post("/search/", json={"query": "news"})
