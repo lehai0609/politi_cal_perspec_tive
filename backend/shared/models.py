@@ -54,3 +54,21 @@ class ExtractResponse(BaseModel):
     title: str
     language: str
     chars: int
+
+
+class SummarizeRequest(BaseModel):
+    text: str
+    max_sentences: int = 3
+
+
+class SummarizeResponse(BaseModel):
+    summary: str
+
+
+class BiasRequest(BaseModel):
+    source: str
+
+
+class BiasResponse(BaseModel):
+    bias: str
+    bias_score: int
