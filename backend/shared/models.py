@@ -28,6 +28,14 @@ class SearchResponse(BaseModel):
     articles: List[Article]
 
 
+class QueryRequest(BaseModel):
+    topics: List[str]
+
+
+class QueryResponse(BaseModel):
+    queries: List[str]
+
+
 class DedupRequest(BaseModel):
     items: List[str]
 
