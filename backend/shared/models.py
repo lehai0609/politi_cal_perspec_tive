@@ -80,3 +80,19 @@ class BiasRequest(BaseModel):
 class BiasResponse(BaseModel):
     bias: str
     bias_score: int
+
+
+class PerspectiveRequest(BaseModel):
+    url: str | None = None
+    html: str | None = None
+    force: bool = False
+
+
+class PerspectiveResponse(BaseModel):
+    topics: List[str]
+    queries: List[str]
+    articles: List[Article]
+    groups: List[List[str]]
+    summary: str
+    bias: str
+    bias_score: int
