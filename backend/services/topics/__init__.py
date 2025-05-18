@@ -1,4 +1,7 @@
-import spacy
+try:
+    import spacy
+except ModuleNotFoundError:  # pragma: no cover - spaCy unavailable in some envs
+    spacy = None
 from fastapi import APIRouter
 
 from backend.shared.models import TopicRequest, TopicResponse
@@ -14,6 +17,16 @@ class TopicDetector:
     @staticmethod
     def get_topics(text: str) -> list[str]:
         global _nlp
+        if spacy is None:
+            tokens = text.split()
+            seen: set[str] = set()
+            deduped = []
+            for t in tokens:
+                if t not in seen:
+                    deduped.append(t)
+                    seen.add(t)
+            return deduped[:3]
+
         if _nlp is None:
             _nlp = spacy.load("en_core_web_sm")
 
