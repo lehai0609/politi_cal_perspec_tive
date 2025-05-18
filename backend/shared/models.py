@@ -38,4 +38,19 @@ class DedupGroup(BaseModel):
 
 
 class DedupResponse(BaseModel):
-    groups: List[DedupGroup]
+    groups: List[List[str]]
+
+
+class ExtractRequest(BaseModel):
+    """Request body for the article extractor."""
+
+    url: str | None = None
+    html: str | None = None
+    force: bool = False
+
+
+class ExtractResponse(BaseModel):
+    clean_text: str
+    title: str
+    language: str
+    chars: int
